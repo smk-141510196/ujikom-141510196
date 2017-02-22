@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Request;
 use App\GolonganModel;
+use Validator;
+use Input;
 class GolonganController extends Controller
 {
     /**
@@ -38,9 +40,27 @@ class GolonganController extends Controller
     public function store(Request $request)
     {
         //
+        $rules=[
+                'kode_golongan'=>'required|unique:golongans,kode_golongan',
+                'nama_golongan'=>'required',
+                'besaran_uang'=>'required'
+        ];
+        $sms=[
+                'kode_golongan.required'=>'Jangan Kosong',
+                'kode_golongan.unique'=>'Data Tidak tersedia',
+                'nama_golongan.required'=>'Jangan Kosong',
+                'besaran_uang.required'=>'Jangan Kosong',
+        ];
+        $validasi = Validator::make(Input::all(),$rules,$sms);
+        if ($validasi->fails()) {
+            return redirect()->back()
+            ->withErrors($validasi)
+            ->withInput();
+
+        }
         $golongan=Request::all();
         GolonganModel::create($golongan);
-        return redirect('golongan');
+        return redirect('Golongan');
     }
 
     /**
@@ -79,6 +99,31 @@ class GolonganController extends Controller
     public function update(Request $request, $id)
     {
         //
+        $jabatan=GolonganModel::where('id',$id)->first();
+        if($jabatan['kode_jabatan'] !=request('kode_jabatan')){
+             $rules=[
+                'kode_golongan'=>'required|unique:golongans',
+                'nama_golongan'=>'required',
+                'besaran_uang'=>'required'];
+        }
+        else{
+             $rules=[
+                'kode_golongan'=>'required|unique:golongans',
+                'nama_golongan'=>'required',
+                'besaran_uang'=>'required'];
+        }
+        $sms=[
+                'kode_golongan.required'=>'Jangan Kosong',
+                'kode_golongan.unique'=>'Data Tidak tersedia',
+                'nama_golongan.required'=>'Jangan Kosong',
+                'besaran_uang.required'=>'Jangan Kosong',
+        ];
+        $validasi = Validator::make(Input::all(),$rules,$sms);
+        if ($validasi->fails()) {
+            return redirect()->back()
+            ->withErrors($validasi)
+            ->withInput();
+        }
         $golonganUpdate=Request::all();
         $golongan=GolonganModel::find($id);
         $golongan->update($golonganUpdate);

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class TunjanganPegawaiModel extends Model
 {
     //
-    protected $table='tujangan_pegawais'
+    protected $table='tujangan_pegawais';
     protected $fillable=['id','kode_tunjangan_id','pegawai_id'];
 
     public function TunjanganModel(){

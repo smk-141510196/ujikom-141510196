@@ -28,3 +28,5 @@ Auth::routes();
 Route::get('/home', 'HomeController@index');
 Route::resource('Jabatan','JabatanController');
 Route::resource('Golongan','GolonganController');
+Route::resource('KategoriLembur','KategoriLemburController');
+Route::resource('Tunjangan','TunjanganController');

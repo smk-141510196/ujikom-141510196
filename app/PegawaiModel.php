@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class PegawaiModel extends Model
 {
     //
-    protected $table='pegawais'
+    protected $table='pegawais';
     protected $fillable=['id','nip','user_id','jabatan_id','golongan_id','photo'];
 
     public function GolonganModel(){

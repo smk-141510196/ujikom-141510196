@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class LemburPegawaiModel extends Model
 {
     //
-    protected $table='lembur_pegawais'
+    protected $table='lembur_pegawais';
     protected $fillable=['id','kode_lembur_id','pegawai_id','jumlah_jam'];
 
     public function KategoriLemburModel(){

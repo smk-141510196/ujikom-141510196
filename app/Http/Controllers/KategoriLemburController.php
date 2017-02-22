@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use Request;
 use App\JabatanModel;
+use App\GolonganModel;
+use App\KategoriLemburModel;
 use Validator;
 use Input;
 
-class JabatanController extends Controller
+class KategoriLemburController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -17,8 +19,8 @@ class JabatanController extends Controller
     public function index()
     {
         //
-        $jabatan=JabatanModel::all();
-        return view('Jabatan.index',compact('jabatan'));
+        $kategorilembur=KategoriLemburModel::with('JabatanModel','GolonganModel')->get();
+        return view('KategoriLembur.index',compact('kategorilembur'));
     }
 
     /**
@@ -29,7 +31,10 @@ class JabatanController extends Controller
     public function create()
     {
         //
-         return view('Jabatan.create');
+         $kategorilembur =KategoriLemburModel::all();
+         $jabatan = JabatanModel::all();
+         $golongan = GolonganModel::all();        
+         return view('KategoriLembur.create',compact('kategorilembur','jabatan','golongan'));
     }
 
     /**
@@ -42,14 +47,16 @@ class JabatanController extends Controller
     {
         //
         $rules=[
-                'kode_jabatan'=>'required|unique:jabatans,kode_jabatan',
-                'nama_jabatan'=>'required',
+                'kode_lembur'=>'required|unique:kategori_lemburs,kode_lembur',
+                'jabatan_id'=>'required',
+                'golongan_id'=>'required',
                 'besaran_uang'=>'required'
         ];
         $sms=[
-                'kode_jabatan.required'=>'Jangan Kosong',
-                'kode_jabatan.unique'=>'Data Tidak tersedia',
-                'nama_jabatan.required'=>'Jangan Kosong',
+                'kode_lembur.required'=>'Jangan Kosong',
+                'kode_lembur.unique'=>'Data Tidak tersedia',
+                'jabatan_id.required'=>'Jangan Kosong',
+                'golongan_id.required'=>'Jangan Kosong',
                 'besaran_uang.required'=>'Jangan Kosong',
         ];
         $validasi = Validator::make(Input::all(),$rules,$sms);
@@ -59,9 +66,9 @@ class JabatanController extends Controller
             ->withInput();
 
         }
-        $jabatan=Request::all();
-        JabatanModel::create($jabatan);
-        return redirect('Jabatan');
+        $kategorilembur=Request::all();
+        KategoriLemburModel::create($kategorilembur);
+        return redirect('KategoriLembur');
     }
 
     /**
@@ -73,8 +80,8 @@ class JabatanController extends Controller
     public function show($id)
     {
         //
-        $jabatan=JabatanModel::find($id);
-        return view('Jabatan.show',compact('jabatan'));
+        $kategorilembur=KategoriLemburModel::find($id);
+        return view('KategoriLembur.show',compact('kategorilembur'));
     }
 
     /**
@@ -86,8 +93,11 @@ class JabatanController extends Controller
     public function edit($id)
     {
         //
-        $jabatan=JabatanModel::find($id);
-        return view('Jabatan.edit',compact('jabatan'));
+         $jabatan = JabatanModel::all();
+         $golongan = GolonganModel::all(); 
+         $kategorilembur=KategoriLemburModel::find($id);
+         
+        return view('KategoriLembur.edit',compact('kategorilembur','jabatan','golongan'));
     }
 
     /**
@@ -100,23 +110,25 @@ class JabatanController extends Controller
     public function update(Request $request, $id)
     {
 
-        $jabatan=JabatanModel::where('id',$id)->first();
-        if($jabatan['kode_jabatan'] !=request('kode_jabatan')){
+        $kategorilembur=KategoriLemburModel::where('id',$id)->first();
+        if($kategorilembur['kode_lembur'] !=request('kode_lembur')){
              $rules=[
-                'kode_jabatan'=>'required|unique:jabatans',
-                'nama_jabatan'=>'required',
+                'kode_lembur'=>'required|unique:kategori_lemburs,kode_lembur',
+                'jabatan_id'=>'required',
+                'golongan_id'=>'required',
                 'besaran_uang'=>'required'];
         }
         else{
              $rules=[
-                'kode_jabatan'=>'required|unique:jabatans',
-                'nama_jabatan'=>'required',
+                'kode_lembur'=>'required',
+                'jabatan_id'=>'required',
+                'golongan_id'=>'required',
                 'besaran_uang'=>'required'];
         }
         $sms=[
-                'kode_jabatan.required'=>'Jangan Kosong',
-                'kode_jabatan.unique'=>'Data Tidak tersedia',
-                'nama_jabatan.required'=>'Jangan Kosong',
+                'kode_lembur.required'=>'Jangan Kosong',
+                'jabatan_id.required'=>'Jangan Kosong',
+                'golongan_id.required'=>'Jangan Kosong',
                 'besaran_uang.required'=>'Jangan Kosong',
         ];
         $validasi = Validator::make(Input::all(),$rules,$sms);
@@ -125,10 +137,10 @@ class JabatanController extends Controller
             ->withErrors($validasi)
             ->withInput();
         }
-        $jabatanUpdate=Request::all();
-        $jabatan=JabatanModel::find($id);
-        $jabatan->update($jabatanUpdate);
-        return redirect(route('Jabatan.index'));
+        $kategoriUpdate=Request::all();
+        $kategorilembur=KategoriLemburModel::find($id);
+        $kategorilembur->update($kategoriUpdate);
+        return redirect(route('KategoriLembur.index'));
     }
 
     /**
@@ -140,7 +152,7 @@ class JabatanController extends Controller
     public function destroy($id)
     {
         //
-         JabatanModel::find($id)->delete();
-         return redirect('Jabatan');
+         KategoriLemburModel::find($id)->delete();
+         return redirect('KategoriLembur');
     }
 }

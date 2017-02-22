@@ -22,7 +22,7 @@ class CreateTunjangansTable extends Migration
             $table->foreign('golongan_id')->on('golongans')->references('id')->onDelete('Cascade')->onUpdate('Cascade');
             $table->string('status');
             $table->integer('jumlah_anak');
-            $table->integer('besaran_tunjangan');
+            $table->integer('besaran_uang');
             $table->timestamps();
         });
     }
