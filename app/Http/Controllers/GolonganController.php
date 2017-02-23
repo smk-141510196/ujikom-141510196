@@ -43,7 +43,7 @@ class GolonganController extends Controller
         $rules=[
                 'kode_golongan'=>'required|unique:golongans,kode_golongan',
                 'nama_golongan'=>'required',
-                'besaran_uang'=>'required'
+                'besaran_uang'=>'required',
         ];
         $sms=[
                 'kode_golongan.required'=>'Jangan Kosong',

@@ -131,7 +131,7 @@ class TunjanganController extends Controller
                 'jabatan_id'=>'required',
                 'golongan_id'=>'required',
                 'status'=>'required',
-                'jumlah_anak'=>'required|min>=0',
+                'jumlah_anak'=>'required|min:0',
                 'besaran_uang'=>'required'];
         }
         $sms=[

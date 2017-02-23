@@ -1,19 +1,18 @@
 @extends('layouts.app')
 
 @section('content')
- <h1>Tunjangan</h1>
- <a href="{{url('/Tunjangan/create')}}" class="btn btn-success">Tambah Tunjangan</a>
+ <h1>Pegawai</h1>
+ <a href="{{url('/Pegawai/create')}}" class="btn btn-success"> Daftarkan Pegawai</a>
  <hr>
  <table class="table table-striped table-bordered table-hover">
      <thead>
      <tr class="bg-info">
          <th>No.</th>
-         <th>Kode Tunjangan</th>
+         <th>nip</th>
+         <th>user_id</th>
          <th>Nama Jabatan</th>
          <th>Nama Golongan</th>
-         <th>Status</th>
-         <th>Jumlah Anak</th>
-         <th>Besaran Uang</th>
+         <th>photo</th>
          <th colspan="3">Actions</th>
      </tr>
      </thead>
@@ -21,10 +20,11 @@
      $n=1;
      @endphp
      <tbody>
-     @foreach ($tunjangan as $data)
+     @foreach ($pegawai as $data)
          <tr>
              <td>{{ $n++ }}</td>
-             <td>{{ $data->kode_tunjangan}}</td>
+             <td>{{ $data->nip}}</td>
+             <td>{{ $data->user_id}}</td>
              <td>{{ $data->JabatanModel->nama_jabatan }}</td>
              <td>{{ $data->GolonganModel->nama_golongan }}</td>
              <td>{{ $data->status }}</td>

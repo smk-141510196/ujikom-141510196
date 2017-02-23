@@ -30,3 +30,4 @@ Route::resource('Jabatan','JabatanController');
 Route::resource('Golongan','GolonganController');
 Route::resource('KategoriLembur','KategoriLemburController');
 Route::resource('Tunjangan','TunjanganController');
+Route::resource('Pegawai','PegawaiController');

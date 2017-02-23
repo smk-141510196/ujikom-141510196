@@ -44,7 +44,7 @@ class JabatanController extends Controller
         $rules=[
                 'kode_jabatan'=>'required|unique:jabatans,kode_jabatan',
                 'nama_jabatan'=>'required',
-                'besaran_uang'=>'required'
+                'besaran_uang'=>'required',
         ];
         $sms=[
                 'kode_jabatan.required'=>'Jangan Kosong',
@@ -105,13 +105,13 @@ class JabatanController extends Controller
              $rules=[
                 'kode_jabatan'=>'required|unique:jabatans',
                 'nama_jabatan'=>'required',
-                'besaran_uang'=>'required'];
+                'besaran_uang'=>'required',];
         }
         else{
              $rules=[
                 'kode_jabatan'=>'required|unique:jabatans',
                 'nama_jabatan'=>'required',
-                'besaran_uang'=>'required'];
+                'besaran_uang'=>'required',];
         }
         $sms=[
                 'kode_jabatan.required'=>'Jangan Kosong',
