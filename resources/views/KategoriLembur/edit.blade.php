@@ -9,7 +9,7 @@ active
             <div class="panel panel-default">
                 <div class="panel-heading">Edit Jabatan</div>
                 <div class="panel-body">
-                    {!! Form::model($kategorilembur,['method' => 'PATCH','route'=>['KategoriLembur.update',$kategorilembur->id]]) !!}
+                    {!! Form::model($kategori_lembur,['method' => 'PATCH','route'=>['KategoriLembur.update',$kategori_lembur->id]]) !!}
                         {!!Form::hidden('id',null,['class'=>'form-control'])!!}
                         <div class="form-group{{ $errors->has('kode_lembur') ? ' has-error' : '' }}">
                             <label for="kode_lembur" class="col-md-4 control-label">Kode Lembur</label>

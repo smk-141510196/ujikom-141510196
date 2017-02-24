@@ -19,7 +19,7 @@
      $n=1;
      @endphp
      <tbody>
-     @foreach ($kategorilembur as $data)
+     @foreach ($kategori_lembur as $data)
          <tr>
              <td>{{ $n++ }}</td>
              <td>{{ $data->kode_lembur}}</td>

@@ -2,152 +2,197 @@
 
 namespace App\Http\Controllers;
 
-use Request;
-use Validator;
-use Input;
+use Illuminate\Http\Request;
 use App\PegawaiModel;
-use App\User;
-use App\JabatanModel;
 use App\GolonganModel;
+use App\JabatanModel;
+use App\KategoriLemburModel;
+use App\User;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Input;
 class PegawaiController extends Controller
 {
-   /**
-    * Display a listing of the resource.
-    *
-    * @return \Illuminate\Http\Response
-    */
-   use RegistersUsers;
-   public function index()
-   {
-       $pegawai=PegawaiModel::all();
-       return view ('Pegawai.index',compact('pegawai'));
-       // dd($pegawai);
-   }
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    //  public function __construct()
+    // {
+    //     $this->middleware('hrd');
+    // }
+        use RegistersUsers;
+    public function index()
+    {
+        $pegawai=PegawaiModel::orderby('id','desc')->paginate(5);
+        // $golongan=Golongan::all();
+        // $jabatan=Jabatan::all();
+        // $user=User::all();
+          if(request()->has('nip')){
+            $pegawai=PegawaiModel::where('nip',request('nip'))->paginate(0);
+        }
+        return view('Pegawai.index',compact('pegawai','GolonganModel','user','JabatanModel'));    
+    }
 
-   /**
-    * Show the form for creating a new resource.
-    *
-    * @return \Illuminate\Http\Response
-    */
-   public function create()
-   {
-       $jabatan=JabatanModel::all();
-       $user=User::all();
-       $golongan=GolonganModel::all();
-       return view('Pegawai.create',compact('jabatan','user','golongan'));
-   }
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        $jabatan=JabatanModel::all();
+        $golongan=GolonganModel::all();
+        return view('Pegawai.create',compact('jabatan','golongan'));
+    }
 
-   /**
-    * Store a newly created resource in storage.
-    *
-    * @param  \Illuminate\Http\Request  $request
-    * @return \Illuminate\Http\Response
-    */
-   public function store(Request $request)
-   {
-    
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+           $rules = array('email' => 'required|unique:users',
+                        'password' => 'required|min:6|confirmed',
+                        'name' => 'required',
+                        'permision' =>'required',
+                        'nip' => 'required|min:11|numeric|unique:pegawais',
+                        'jabatan_id' =>'required',
+                        'golongan_id' => 'required',
+                        'photo' => 'required'
+                        
+                         );
+        $message =array('email.unique' =>'Data Tidak Tersedia' ,
+                        'name.required' =>'Wajib Isi',
+                        'email.required' =>'Wajib Isi',
+                        'password.required' =>'wajib isi',
+                        'password.confirmed' =>'Masukan Password Yang Benar',
+                        'permision.required' =>'Wajib isi',
+                        'nip.unique' =>'Data Tidak Tersedia',
+                        'nip.required' =>'Wajib isi',
+                        'nip.min' =>'Minimal 11 karakter',
+                        'nip.numeric' =>'Input Dengan Angka',
+                        'jabatan_id.required' =>'Wajib isi',
+                        'golongan_id.required' =>'Wajib isi',
+                        'photo.required' =>'Wajib isi');
 
-        $this->Validate($request,['name'=>'required','email'=>'required|unique:users','permission'=>'required','password'=>'required','nip'=>'required|numeric','id_golongan'=>'required','id_jabatan'=>'required','poto'=>'required']);
+       // $validation = Validator::make(Input::all(), $rules, $message);
+       //  if ($validation->fails())
+       //  {
+       //   return Redirect('Pegawai/create')->withErrors($validation)->withInput();
+       //  }
 
-       
-       
-       $file = Input::File('photo');
-       $destinationPath = public_path().'/assets/image';
-       $filename = $file->getClientOriginalName();
-       $uploadSuccess = $file->move($destinationPath, $filename);
+        $file = Input::file('photo');
+        $destinationPath = public_path().'/assets/image/';
+        $filename = $file-> getClientOriginalName();
+        $uploadSuccess = $file->move($destinationPath, $filename);
 
+        if(Input::hasFile('photo')){
+          
+            $user= User::create([
+            'name' => $request->get('name'),
+            'email' => $request->get('email'),
+            'permision' => $request->get('permision'),
+            'password' => bcrypt($request->get('password')),
+        ]);
+            $pegawai = new PegawaiModel;
+            $pegawai->nip = $request->get('nip');
+            $pegawai->jabatan_id = $request->get('jabatan_id');
+            $pegawai->golongan_id = $request->get('golongan_id');
+            $pegawai->user_id = $user->id;
+            
+            $pegawai->photo = $filename;
+            $pegawai->save();
+            $lama = KategoriLemburModel::where('jabatan_id',$pegawai->jabatan_id)->where('golongan_id',$pegawai->golongan_id)->first();
+            // dd($lama);
+            if (isset($lama)) {
+            $error=true ;
+            $pegawai=PegawaiModel::paginate(5);
+            return view('Pegawai.index',compact('pegawai'));
+        }
+    }
+         $kategorilembur=new KategoriLemburModel ;
+         $kategorilembur->jabatan_id =$pegawai->jabatan_id;
+         $kategorilembur->golongan_id=$pegawai->golongan_id;
+         $a =date('dmys');
+         $kategorilembur->kode_lembur="KODEKAT".$a."-".$pegawai->jabatan_id."-".$pegawai->golongan_id ;
+         $kategorilembur->besaran_uang=0 ;
+         $kategorilembur->save();
+             return redirect('pegawai');
+         
+    }
 
-       if(Input::hasFile('photo')){
-           $user=new User;
-           $user->name=Input::get('name');
-           $user->email=Input::get('email');
-           $user->permission=Input::get('permision');
-           $user->password=bcrypt(Input::get('password'));
-           $user->save();
-           $pegawai = new Pegawai;
-           $pegawai->nip=Input::get('nip');
-           $pegawai->golongan_id=Input::get('golongan_id');
-           $pegawai->jabatan_id=Input::get('jabatan_id');
-           $pegawai->id_user=$user->id;
-           $pegawai->photo=$filename;
-           $pegawai->save();
-           return redirect('Pegawai');
-       }
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        //
+    }
 
-   }
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+         
+         $pegawai=PegawaiModel::find($id);
+         $jabatan=JabatanModel::all();
+         $golongan=GolonganModel::all();
+         return view('Pegawai.edit',compact('pegawai','jabatan','golongan'));
+    }
 
-   /**
-    * Display the specified resource.
-    *
-    * @param  int  $id
-    * @return \Illuminate\Http\Response
-    */
-   public function show($id)
-   {
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        
+
+        $update=Input::all();
+        $logo =Input::file('photo') ;
+            $upload='/assets/image/';
+            $filename=$logo->getClientOriginalName();
+            $success=$logo->move($upload,$filename);
+            if($success){
+                $pegawai=new pegawai ;
+                $pegawai=array('photo'=>$filename,
+                                'nip'=>Input::get('nip'),
+                                'jabatan_id'=>Input::get('jabatan_id'),
+                                'golongan_id'=>Input::get('golongan_id'));
+        
+
+                pegawai::where('id',$id)->update($pegawai);
+            return redirect('pegawai');
+    }
 }
 
-   /**
-    * Show the form for editing the specified resource.
-    *
-    * @param  int  $id **/
- public function edit($id)
-   {
-       $pegawai=Pegawai::find($id);
-       $jabatan=Jabatan::all();
-       $golongan=Golongan::all();
-       return view('pegawai.edit',compact('pegawai','jabatan','golongan'));
-   }
-
-   /**
-    * Update the specified resource in storage.
-    *
-    * @param  \Illuminate\Http\Request  $request
-    * @param  int  $id
-    * @return \Illuminate\Http\Response
-    */
-   public function update(Request $request, $id)
-   {
-       $update = Pegawai::where('id', $id)->first();
-       $user = User::where('id', $id)->first();
-       $user->permission=$request['permission'];
-       $user->email=$request['email'];
-       $user->name=$request['name'];
-       $user->update();
-       $update->nip = $request['nip'];
-       $update->id_golongan = $request['id_golongan'];
-       $update->id_jabatan = $request['id_jabatan'];
-
-       if($request->file('poto') == "")
-       {
-           $update->photo = $update->photo;
-       } 
-       else
-       {
-           $file       = $request->file('poto');
-           $fileName   = $file->getClientOriginalName();
-           $request->file('poto')->move("image/", $fileName);
-           $update->poto = $fileName;
-       }
-       
-       $update->update();
-       return redirect(route('Pegawai.index'));
-   }
-
-   /**
-    * Remove the specified resource from storage.
-    *
-    * @param  int  $id
-    * @return \Illuminate\Http\Response
-    */
-   public function destroy($id)
-   {
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
        $pegawai=PegawaiModel::find($id);
-       
-       $user=User::where('id',$pegawai->id_user)->delete();
-       $pegawai->delete();
-       // dd($pegawai);
-       return redirect('pegawai');
-   }
+        
+        $user=User::where('id',$pegawai->user_id)->delete();
+        $pegawai->delete();
+        return redirect('pegawai');
+    }
 }

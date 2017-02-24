@@ -10,7 +10,7 @@
                     <form class="form-horizontal" role="form" method="POST" action="{{ url('/Tunjangan') }}">
                         {{ csrf_field() }}
 
-                        <div class="form-group{{ $errors->has('kode_lembur') ? ' has-error' : '' }}">
+                        <div class="form-group{{ $errors->has('kode_tunjangan') ? ' has-error' : '' }}">
                             <label for="name" class="col-md-4 control-label">Kode Tunjangan</label>
 
                             <div class="col-md-6">

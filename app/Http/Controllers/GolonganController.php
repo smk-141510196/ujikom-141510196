@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Request;
 use App\GolonganModel;
+use Request;
 use Validator;
 use Input;
+use Redirect;
 class GolonganController extends Controller
 {
     /**
@@ -13,10 +14,13 @@ class GolonganController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    
     public function index()
-    {
-        //
-        $golongan=GolonganModel::all();
+    { 
+         $golongan=GolonganModel::orderby('id','desc')->paginate(5);
+     if(request()->has('kode_golongan')){
+            $golongan=GolonganModel::where('kode_golongan',request('kode_golongan'))->paginate(0);
+        }
         return view('Golongan.index',compact('golongan'));
     }
 
@@ -27,8 +31,7 @@ class GolonganController extends Controller
      */
     public function create()
     {
-        //
-         return view('Golongan.create');
+        return view('Golongan.create');
     }
 
     /**
@@ -39,28 +42,30 @@ class GolonganController extends Controller
      */
     public function store(Request $request)
     {
-        //
-        $rules=[
-                'kode_golongan'=>'required|unique:golongans,kode_golongan',
-                'nama_golongan'=>'required',
-                'besaran_uang'=>'required',
-        ];
-        $sms=[
-                'kode_golongan.required'=>'Jangan Kosong',
-                'kode_golongan.unique'=>'Data Tidak tersedia',
-                'nama_golongan.required'=>'Jangan Kosong',
-                'besaran_uang.required'=>'Jangan Kosong',
-        ];
-        $validasi = Validator::make(Input::all(),$rules,$sms);
-        if ($validasi->fails()) {
-            return redirect()->back()
-            ->withErrors($validasi)
-            ->withInput();
+       $rules = array(
+            'kode_golongan'=>'required|unique:golongans',
+            'nama_golongan'=>'required',
+            'besaran_uang'=>'required'
+            );
 
+        $message= array(
+            
+            'nama_golongan.required'=>'Maaf Data Masih Kosong',
+            'kode_golongan.required'=>'Maaf Data Masih Kosong',
+            'kode_golongan.unique'=>'Data Tidak Tersedia',
+            'besaran_uang.required'=>'Maaf Data Masih Kosong'
+            
+            );
+       $validation = Validator::make(Input::all(), $rules, $message);
+        if ($validation->fails())
+        {
+         return Redirect('Golongan/create')->withErrors($validation)->withInput();
         }
-        $golongan=Request::all();
-        GolonganModel::create($golongan);
-        return redirect('Golongan');
+
+         $golongans=Request::all();
+        GolonganModel::create($golongans);
+        $golongan=GolonganModel::all();
+        return redirect('golongan');
     }
 
     /**
@@ -72,8 +77,6 @@ class GolonganController extends Controller
     public function show($id)
     {
         //
-        $golongan=GolonganModel::find($id);
-        return view('Golongan.show',compact('golongan'));
     }
 
     /**
@@ -84,8 +87,7 @@ class GolonganController extends Controller
      */
     public function edit($id)
     {
-        //
-        $golongan=GolonganModel::find($id);
+         $golongan=GolonganModel::find($id);
         return view('Golongan.edit',compact('golongan'));
     }
 
@@ -98,37 +100,40 @@ class GolonganController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
-        $jabatan=GolonganModel::where('id',$id)->first();
-        if($jabatan['kode_jabatan'] !=request('kode_jabatan')){
-             $rules=[
-                'kode_golongan'=>'required|unique:golongans',
-                'nama_golongan'=>'required',
-                'besaran_uang'=>'required'];
+        
+           $golongan=GolonganModel::where('id',$id)->first();
+           if ($golongan['kode_golongan'] !=Request('kode_golongan')) {
+                $rules = array(
+            'kode_golongan'=>'required|unique:golongans',
+            'nama_golongan'=>'required',
+            'besaran_uang'=>'required'
+            );
+           }
+           else{
+            $rules = array(
+            'kode_golongan'=>'required',
+            'nama_golongan'=>'required',
+            'besaran_uang'=>'required'
+            );
+           }
+        $message= array(
+            
+            'nama_golongan.required'=>'Maaf Data Masih Kosong',
+            'kode_golongan.required'=>'Maaf Data Masih Kosong',
+            'kode_golongan.unique'=>'data sudah ada',
+            'besaran_uang.required'=>'Maaf Data Masih Kosong'
+            
+            );
+       $validation = Validator::make(Input::all(), $rules, $message);
+        if ($validation->fails())
+        {
+           return Redirect::back()->withInput()->withErrors($validation->messages());
         }
-        else{
-             $rules=[
-                'kode_golongan'=>'required|unique:golongans',
-                'nama_golongan'=>'required',
-                'besaran_uang'=>'required'];
-        }
-        $sms=[
-                'kode_golongan.required'=>'Jangan Kosong',
-                'kode_golongan.unique'=>'Data Tidak tersedia',
-                'nama_golongan.required'=>'Jangan Kosong',
-                'besaran_uang.required'=>'Jangan Kosong',
-        ];
-        $validasi = Validator::make(Input::all(),$rules,$sms);
-        if ($validasi->fails()) {
-            return redirect()->back()
-            ->withErrors($validasi)
-            ->withInput();
-        }
-        $golonganUpdate=Request::all();
+        $update=Request::all();
         $golongan=GolonganModel::find($id);
-        $golongan->update($golonganUpdate);
+        $golongan->update($update);
         return redirect('Golongan');
-    }
+            }
 
     /**
      * Remove the specified resource from storage.
@@ -138,8 +143,7 @@ class GolonganController extends Controller
      */
     public function destroy($id)
     {
-        //
-         GolonganModel::find($id)->delete();
-         return redirect('Golongan');
+        $golongan=GolonganModel::find($id)->delete();
+        return redirect('Golongan');
     }
 }

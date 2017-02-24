@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Request;
-use App\JabatanModel;
+use Illuminate\Http\Request;
+use Input;
 use App\GolonganModel;
+use App\JabatanModel;
 use App\KategoriLemburModel;
 use Validator;
-use Input;
-
+use Redirect;
 class KategoriLemburController extends Controller
 {
     /**
@@ -16,11 +16,14 @@ class KategoriLemburController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+  
     public function index()
     {
-        //
-        $kategorilembur=KategoriLemburModel::with('JabatanModel','GolonganModel')->get();
-        return view('KategoriLembur.index',compact('kategorilembur'));
+        $kategori_lembur=KategoriLemburModel::orderby('id','desc')->paginate(5);
+        if(request()->has('kode_lembur')){
+            $kategori_lembur=KategoriLemburModel::where('kode_lembur',request('kode_lembur'))->paginate(0);
+        }
+        return view('KategoriLembur.index',compact('kategori_lembur'));
     }
 
     /**
@@ -30,11 +33,9 @@ class KategoriLemburController extends Controller
      */
     public function create()
     {
-        //
-         $kategorilembur =KategoriLemburModel::all();
-         $jabatan = JabatanModel::all();
-         $golongan = GolonganModel::all();        
-         return view('KategoriLembur.create',compact('kategorilembur','jabatan','golongan'));
+        $jabatan=JabatanModel::all();
+         $golongan=GolonganModel::all();
+        return view('KategoriLembur.create',compact('jabatan','golongan'));
     }
 
     /**
@@ -45,29 +46,37 @@ class KategoriLemburController extends Controller
      */
     public function store(Request $request)
     {
-        //
-        $rules=[
-                'kode_lembur'=>'required|unique:kategori_lemburs,kode_lembur',
-                'jabatan_id'=>'required',
-                'golongan_id'=>'required',
-                'besaran_uang'=>'required'
-        ];
-        $sms=[
-                'kode_lembur.required'=>'Jangan Kosong',
-                'kode_lembur.unique'=>'Data Tidak tersedia',
-                'jabatan_id.required'=>'Jangan Kosong',
-                'golongan_id.required'=>'Jangan Kosong',
-                'besaran_uang.required'=>'Jangan Kosong',
-        ];
-        $validasi = Validator::make(Input::all(),$rules,$sms);
-        if ($validasi->fails()) {
-            return redirect()->back()
-            ->withErrors($validasi)
-            ->withInput();
+        $rules = array(
+            'kode_lembur'=>'required|unique:kategori_lemburs',
+            'jabatan_id'=>'required',
+            'golongan_id'=>'required',
+            'besaran_uang'=>'required'
+            );
 
+        $message= array(
+            
+            'jabatan_id.required'=>'Maaf Data Masih Kosong',
+            'golongan_id.required'=>'Maaf Data Masih Kosong',
+            'kode_lembur.required'=>'Maaf Data Masih Kosong',
+            'kode_lembur.unique'=>'Data Tidak Tersedia',
+            'besaran_uang.required'=>'Maaf Data Masih Kosong'
+            
+            );
+       $validation = Validator::make(Input::all(), $rules, $message);
+        if ($validation->fails())
+        {
+         return Redirect('KategoriLembur/create')->withErrors($validation)->withInput();
         }
-        $kategorilembur=Request::all();
-        KategoriLemburModel::create($kategorilembur);
+
+            $kategori = new Kategori_lembur;
+            $kategori->kode_lembur = $request->get('kode_lembur');
+            $kategori->jabatan_id = $request->get('jabatan_id');
+            $kategori->golongan_id = $request->get('golongan_id');
+            $kategori->besaran_uang = $request->get('besaran_uang');
+            
+            
+            $kategori->save();
+            
         return redirect('KategoriLembur');
     }
 
@@ -80,8 +89,6 @@ class KategoriLemburController extends Controller
     public function show($id)
     {
         //
-        $kategorilembur=KategoriLemburModel::find($id);
-        return view('KategoriLembur.show',compact('kategorilembur'));
     }
 
     /**
@@ -92,12 +99,11 @@ class KategoriLemburController extends Controller
      */
     public function edit($id)
     {
-        //
-         $jabatan = JabatanModel::all();
-         $golongan = GolonganModel::all(); 
-         $kategorilembur=KategoriLemburModel::find($id);
-         
-        return view('KategoriLembur.edit',compact('kategorilembur','jabatan','golongan'));
+
+        $kategori_lembur=KategoriLemburModel::find($id);
+         $jabatan=JabatanModel::all();
+         $golongan=GolonganModel::all();
+        return view('KategoriLembur.edit',compact('kategori_lembur','jabatan','golongan'));
     }
 
     /**
@@ -109,38 +115,46 @@ class KategoriLemburController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $kategori = KategoriLemburModel::find($id);
+        $kategori_lembur=KategoriLemburModel::where('id',$id)->first();
+           if ($kategori_lembur['kode_lembur'] !=Request('kode_lembur')) {
+                 $rules = array(
+            'kode_lembur'=>'required|unique:kategori_lemburs',
+            'jabatan_id'=>'required',
+            'golongan_id'=>'required',
+            'besaran_uang'=>'required'
+            );
+           }
+           else{
+            $rules = array(
+            'kode_lembur'=>'required',
+            'jabatan_id'=>'required',
+            'golongan_id'=>'required',
+            'besaran_uang'=>'required'
+            );
+           }
 
-        $kategorilembur=KategoriLemburModel::where('id',$id)->first();
-        if($kategorilembur['kode_lembur'] !=request('kode_lembur')){
-             $rules=[
-                'kode_lembur'=>'required|unique:kategori_lemburs,kode_lembur',
-                'jabatan_id'=>'required',
-                'golongan_id'=>'required',
-                'besaran_uang'=>'required'];
+        $message= array(
+            
+            'jabatan_id.required'=>'Maaf Data Masih Kosong',
+             'golongan_id.required'=>'Maaf Data Masih Kosong',
+            'kode_lembur.required'=>'Maaf Data Masih Kosong',
+            'kode_lembur.unique'=>'Data Tidak Tersedia',
+            'besaran_uang.required'=>'Maaf Data Masih Kosong'
+            
+            );
+       $validation = Validator::make(Input::all(), $rules, $message);
+        if ($validation->fails())
+        {
+           return Redirect::back()->withInput()->withErrors($validation->messages());
         }
-        else{
-             $rules=[
-                'kode_lembur'=>'required',
-                'jabatan_id'=>'required',
-                'golongan_id'=>'required',
-                'besaran_uang'=>'required'];
-        }
-        $sms=[
-                'kode_lembur.required'=>'Jangan Kosong',
-                'jabatan_id.required'=>'Jangan Kosong',
-                'golongan_id.required'=>'Jangan Kosong',
-                'besaran_uang.required'=>'Jangan Kosong',
-        ];
-        $validasi = Validator::make(Input::all(),$rules,$sms);
-        if ($validasi->fails()) {
-            return redirect()->back()
-            ->withErrors($validasi)
-            ->withInput();
-        }
-        $kategoriUpdate=Request::all();
-        $kategorilembur=KategoriLemburModel::find($id);
-        $kategorilembur->update($kategoriUpdate);
-        return redirect(route('KategoriLembur.index'));
+    
+            $kategori->kode_lembur = $request->get('kode_lembur');
+            $kategori->jabatan_id = $request->get('jabatan_id');
+            $kategori->golongan_id = $request->get('golongan_id');
+            $kategori->besaran_uang = $request->get('besaran_uang');
+            $kategori->save();
+        return redirect('KategoriLembur');
     }
 
     /**
@@ -151,8 +165,7 @@ class KategoriLemburController extends Controller
      */
     public function destroy($id)
     {
-        //
-         KategoriLemburModel::find($id)->delete();
-         return redirect('KategoriLembur');
+        $kategori_lembur=KategoriLemburModel::find($id)->delete();
+        return redirect('kategori_lembur');
     }
 }

@@ -3,12 +3,11 @@
 namespace App\Http\Controllers;
 
 use Request;
-use App\JabatanModel;
-use App\GolonganModel;
 use App\TunjanganModel;
+use App\GolonganModel;
+use App\JabatanModel;
 use Validator;
 use Input;
-
 class TunjanganController extends Controller
 {
     /**
@@ -16,12 +15,14 @@ class TunjanganController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
     public function index()
     {
-        //
-        $tunjangan=TunjanganModel::with('JabatanModel','GolonganModel')->get();
-        return view('Tunjangan.index',compact('tunjangan'));
-    }
+         $tunjangan=TunjanganModel::orderby('id','desc')->paginate(5);
+        if(request()->has('kode_tunjangan')){
+            $tunjangan=TunjanganModel::where('kode_tunjangan',request('kode_tunjangan'))->paginate(0);
+        }
+        return view('Tunjangan.index',compact('tunjangan'));    }
 
     /**
      * Show the form for creating a new resource.
@@ -30,12 +31,10 @@ class TunjanganController extends Controller
      */
     public function create()
     {
-        //
-         $tunjangan =TunjanganModel::all();
-         $jabatan = JabatanModel::all();
-         $golongan = GolonganModel::all();        
-         return view('Tunjangan.create',compact('tunjangan','jabatan','golongan'));
-    }
+         $jabatan=JabatanModel::all();
+         $golongan=GolonganModel::all();
+        return view('Tunjangan.create',compact('jabatan','golongan'));
+            }
 
     /**
      * Store a newly created resource in storage.
@@ -45,34 +44,31 @@ class TunjanganController extends Controller
      */
     public function store(Request $request)
     {
-        //
-        $rules=[
-                'kode_tunjangan'=>'required|unique:tunjangans,kode_tunjangan',
-                'jabatan_id'=>'required',
-                'golongan_id'=>'required',
-                'status'=>'required',
-                'jumlah_anak'=>'required|min:0',
-                'besaran_uang'=>'required'
-        ];
-        $sms=[
-                'kode_tunjangan.required'=>'Jangan Kosong',
-                'kode_tunjangan.unique'=>'Data Tidak tersedia',
-                'jabatan_id.required'=>'Jangan Kosong',
-                'golongan_id.required'=>'Jangan Kosong',
-                'status.required'=>'Jangan Kosong',
-                'jumlah_anak.required'=>'Jangan Kosong',
-                'jumlah_anak.min'=>'ERROR',
-                'besaran_uang.required'=>'Jangan Kosong',
-        ];
-        $validasi = Validator::make(Input::all(),$rules,$sms);
-        if ($validasi->fails()) {
-            return redirect()->back()
-            ->withErrors($validasi)
-            ->withInput();
+        $rules = array(
+            'kode_tunjangan'=>'required|unique:tunjangans',
+            'status'=>'required',
+            'jumlah_anak'=>'required',
+            'besaran_uang'=>'required'
+            );
 
+        $message= array(
+            
+            'status.required'=>'Maaf Data Masih Kosong',
+            'kode_tunjangan.required'=>'Maaf Data Masih Kosong',
+            'kode_tunjangan.unique'=>'Data Tidak Tersedia',
+            'jumlah_anak.required'=>'Maaf Data Masih Kosong',
+            'besaran_uang.required'=>'Maaf Data Masih Kosong'
+            
+            );
+       $validation = Validator::make(Input::all(), $rules, $message);
+        if ($validation->fails())
+        {
+         return Redirect('Tunjangan/create')->withErrors($validation)->withInput();
         }
-        $tunjangan=Request::all();
-        TunjanganModel::create($tunjangan);
+
+         $tunjangans=Request::all();
+        TunjanganModel::create($tunjangans);
+        $tunjangan=TunjanganModel::all();
         return redirect('Tunjangan');
     }
 
@@ -85,8 +81,6 @@ class TunjanganController extends Controller
     public function show($id)
     {
         //
-        $tunjangan=TunjanganModel::find($id);
-        return view('Tunjangan.show',compact('tunjangan'));
     }
 
     /**
@@ -97,13 +91,10 @@ class TunjanganController extends Controller
      */
     public function edit($id)
     {
-        //
-         $jabatan = JabatanModel::all();
-         $golongan = GolonganModel::all(); 
-         $tunjangan=TunjanganModel::find($id);
-         
-        return view('Tunjangan.edit',compact('tunjangan','jabatan','golongan'));
-    }
+        $tunjangan=TunjanganModel::find($id);
+        $jabatan=JabatanModel::all();
+        $golongan=GolonganModel::all();
+        return view('Tunjangan.edit',compact('tunjangan','golongan','jabatan'));    }
 
     /**
      * Update the specified resource in storage.
@@ -114,47 +105,44 @@ class TunjanganController extends Controller
      */
     public function update(Request $request, $id)
     {
+      $tunjangan =TunjanganModel::find($id);
+         if ($tunjangan['kode_tunjangan'] !=Request('kode_tunjangan')) {
+                $rules = array(
+            'kode_tunjangan'=>'required|unique:tunjangans',
+            'status'=>'required',
+            'jumlah_anak'=>'required',
+            'besaran_uang'=>'required'
+            );
+           }
+           else{
+             $rules = array(
+            'kode_tunjangan'=>'required',
+            'status'=>'required',
+            'jumlah_anak'=>'required',
+            'besaran_uang'=>'required'
+            );
+           }
+         
 
-        $tunjangan=TunjanganModel::where('id',$id)->first();
-        if($tunjangan['kode_tunjangan'] !=request('kode_tunjangan')){
-             $rules=[
-                'kode_tunjangan'=>'required|unique:tunjangans,kode_tunjangan',
-                'jabatan_id'=>'required',
-                'golongan_id'=>'required',
-                'status'=>'required',
-                'jumlah_anak'=>'required',
-                'besaran_uang'=>'required'];
+        $message= array(
+            
+            'status.required'=>'Maaf Data Masih Kosong',
+            'kode_tunjangan.required'=>'Maaf Data Masih Kosong',
+            'kode_tunjangan.unique'=>'data sudah ada',
+            'jumlah_anak.required'=>'Maaf Data Masih Kosong',
+            'besaran_uang.required'=>'Maaf Data Masih Kosong'
+            
+            );
+       $validation = Validator::make(Input::all(), $rules, $message);
+        if ($validation->fails())
+        {
+           return Redirect::back()->withInput()->withErrors($validation->messages());
         }
-        else{
-             $rules=[
-                'kode_tunjangan'=>'required',
-                'jabatan_id'=>'required',
-                'golongan_id'=>'required',
-                'status'=>'required',
-                'jumlah_anak'=>'required|min:0',
-                'besaran_uang'=>'required'];
-        }
-        $sms=[
-                'kode_tunjangan.required'=>'Jangan Kosong',
-                'kode_tunjangan.unique'=>'Data Tidak tersedia',
-                'jabatan_id.required'=>'Jangan Kosong',
-                'golongan_id.required'=>'Jangan Kosong',
-                'status.required'=>'Jangan Kosong',
-                'jumlah_anak.required'=>'Jangan Kosong',
-                'jumlah_anak.min'=>'ERROR',
-                'besaran_uang.required'=>'Jangan Kosong',
-        ];
-        $validasi = Validator::make(Input::all(),$rules,$sms);
-        if ($validasi->fails()) {
-            return redirect()->back()
-            ->withErrors($validasi)
-            ->withInput();
-        }
-        $tunjanganUpdate=Request::all();
+        $update=Request::all();
         $tunjangan=TunjanganModel::find($id);
-        $tunjangan->update($tunjanganUpdate);
-        return redirect(route('Tunjangan.index'));
-    }
+        $tunjangan->update($update);
+        return redirect('Tunjangan');
+            }
 
     /**
      * Remove the specified resource from storage.
@@ -164,8 +152,6 @@ class TunjanganController extends Controller
      */
     public function destroy($id)
     {
-        //
-         TunjanganModel::find($id)->delete();
-         return redirect('Tunjangan');
-    }
+        $tunjangan=TunjanganModel::find($id)->delete();
+        return redirect('Tunjangan');    }
 }
