@@ -68,7 +68,7 @@ class KategoriLemburController extends Controller
          return Redirect('KategoriLembur/create')->withErrors($validation)->withInput();
         }
 
-            $kategori = new Kategori_lembur;
+            $kategori = new KategoriLemburModel;
             $kategori->kode_lembur = $request->get('kode_lembur');
             $kategori->jabatan_id = $request->get('jabatan_id');
             $kategori->golongan_id = $request->get('golongan_id');

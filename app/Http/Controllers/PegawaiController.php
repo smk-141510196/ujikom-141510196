@@ -59,7 +59,7 @@ class PegawaiController extends Controller
            $rules = array('email' => 'required|unique:users',
                         'password' => 'required|min:6|confirmed',
                         'name' => 'required',
-                        'permision' =>'required',
+                        'permission' =>'required',
                         'nip' => 'required|min:11|numeric|unique:pegawais',
                         'jabatan_id' =>'required',
                         'golongan_id' => 'required',
@@ -71,7 +71,7 @@ class PegawaiController extends Controller
                         'email.required' =>'Wajib Isi',
                         'password.required' =>'wajib isi',
                         'password.confirmed' =>'Masukan Password Yang Benar',
-                        'permision.required' =>'Wajib isi',
+                        'permission.required' =>'Wajib isi',
                         'nip.unique' =>'Data Tidak Tersedia',
                         'nip.required' =>'Wajib isi',
                         'nip.min' =>'Minimal 11 karakter',
@@ -96,7 +96,7 @@ class PegawaiController extends Controller
             $user= User::create([
             'name' => $request->get('name'),
             'email' => $request->get('email'),
-            'permision' => $request->get('permision'),
+            'permission' => $request->get('permission'),
             'password' => bcrypt($request->get('password')),
         ]);
             $pegawai = new PegawaiModel;

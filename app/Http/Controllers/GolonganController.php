@@ -65,7 +65,7 @@ class GolonganController extends Controller
          $golongans=Request::all();
         GolonganModel::create($golongans);
         $golongan=GolonganModel::all();
-        return redirect('golongan');
+        return redirect('Golongan');
     }
 
     /**

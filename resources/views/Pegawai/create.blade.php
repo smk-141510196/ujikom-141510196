@@ -19,22 +19,22 @@
                             </div>
                         </div>
 
-                         <div class="form-group{{ $errors->has('permision') ? ' has-error' : '' }}">
-                            <label for="name" class="col-md-4 control-label"> <h4>permision</h4></label>
+                         <div class="form-group{{ $errors->has('permission') ? ' has-error' : '' }}">
+                            <label for="name" class="col-md-4 control-label"> <h4>permission</h4></label>
 
                             <div class="col-md-6">
                                <td>
-            <select name="permision" class="form-control">
+            <select name="permission" class="form-control">
            
             <option value="">pilih</option>
-            <option value="Hrd">HRD</option>
+            <option value="HRD">HRD</option>
             <option value="Keuangan">Keuangan</option>
             <option value="Admin">Admin</option>
             <option value="Pegawai">Pegawai</option>
               
             </select>
 
-        {{ $errors->first('permision', ':message')  }}
+        {{ $errors->first('permission', ':message')  }}
         </td>
 
                             </div>

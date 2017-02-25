@@ -62,7 +62,7 @@ class JabatanController extends Controller
         }
 
          $jabatans=Request::all();
-        Jabatan::create($jabatans);
+        JabatanModel::create($jabatans);
         $jabatan=JabatanModel::all();
         return redirect('Jabatan');
     }
